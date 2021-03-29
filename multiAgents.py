@@ -35,37 +35,35 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
     Your minimax agent (question 3)
     """
-
     def getAction(self, gameState):
-        
-        def Minimax_Value(self,gameState,agentIndex=0):
-            if self.depth<=0 or gameState.isWin() or gameState.isLose():    # 终止条件
+        def Minimax_Value(self,gameState,depth,agentIndex=0):
+            if depth<=0 or gameState.isWin() or gameState.isLose():    # 终止条件
                 return self.evaluationFunction(gameState)
             actions=gameState.getLegalActions(agentIndex)
             if agentIndex==0:
-                self.depth-=1
                 v=-1e5
                 for action in actions:
                     nextState=gameState.generateChild(agentIndex,action)
-                    v=max(v,Minimax_Value(self,nextState,agentIndex+1))
+                    v=max(v,Minimax_Value(self,nextState,depth-1,agentIndex+1))
                 return v
             else:
                 v=1e5
                 for action in actions:
                     nextState=gameState.generateChild(agentIndex,action)
-                    v=min(v,Minimax_Value(self,nextState,(agentIndex+1)%(gameState.getNumAgents())))    #取模，构成循环
+                    v=min(v,Minimax_Value(self,nextState,depth,(agentIndex+1)%(gameState.getNumAgents())))    #取模，构成循环
                 return v
        
-       
-        max_act=gameState.getLegalActions(0)[0]     #设置一个默认动作
-        v=-1e5
+        max_act=gameState.getLegalActions(0)[random.randint(0,len(gameState.getLegalActions(0))-1)]
+        value=-1e5
         for act in gameState.getLegalActions(0):
             nextState=gameState.generateChild(0,act)
-            cur_v=Minimax_Value(self,nextState,1)
-            if v<cur_v:
-                max_act=act
-                v=cur_v
-        return max_act
+            cur_v=Minimax_Value(self,nextState,self.depth,1)
+            if value<cur_v:
+                max_act=[act]
+                value=cur_v
+            elif value==cur_v:
+                max_act.append(act)
+        return max_act[random.randint(0,len(max_act)-1)]
                 
         
         """
@@ -113,16 +111,15 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        def Minimax_Value(self,gameState,alpha,beta,agentIndex=0):
-            if self.depth<=0 or gameState.isWin() or gameState.isLose():
+        def Minimax_Value(self,gameState,depth,alpha,beta,agentIndex=0):
+            if depth<=0 or gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState)
             actions=gameState.getLegalActions(agentIndex)
             if agentIndex==0:
-                self.depth-=1
                 v=-1e5
                 for action in actions:
                     nextState=gameState.generateChild(agentIndex,action)
-                    v=max(v,Minimax_Value(self,nextState,alpha,beta,agentIndex+1))
+                    v=max(v,Minimax_Value(self,nextState,depth-1,alpha,beta,agentIndex+1))
                     if v>=beta:return v
                     alpha=max(alpha,v)
                 return v
@@ -130,18 +127,23 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 v=1e5
                 for action in actions:
                     nextState=gameState.generateChild(agentIndex,action)
-                    v=min(v,Minimax_Value(self,nextState,alpha,beta,(agentIndex+1)%(gameState.getNumAgents())))
+                    v=min(v,Minimax_Value(self,nextState,depth,alpha,beta,(agentIndex+1)%(gameState.getNumAgents())))
                     if v<=alpha:return v
                     beta=min(beta,v)
                 return v
-       
-        max_act=gameState.getLegalActions(0)[0]     #设置一个默认动作
-        v=-1e5
+        
+        max_act=gameState.getLegalActions(0)[random.randint(0,len(gameState.getLegalActions(0))-1)]     #设置一个默认动作
+        value=-1e5
+        a=-1e5
+        b=1e5
         for act in gameState.getLegalActions(0):
             nextState=gameState.generateChild(0,act)
-            cur_v=Minimax_Value(self,nextState,-1e5,1e5,1)
-            if v<cur_v:
-                max_act=act
-                v=cur_v
-        return max_act
+            cur_v=Minimax_Value(self,nextState,self.depth,a,b,1)
+            if value<cur_v:
+                max_act=[act]
+                value=cur_v
+            elif value==cur_v:
+                max_act.append(act)
+        return max_act[random.randint(0,len(max_act)-1)]
         util.raiseNotDefined()
+#python pacman.py -p AlphaBetaAgent -l MyMaze -a depth=4

@@ -393,7 +393,7 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    # nodes expanded:6862!!!!!
+    # nodes expanded:6858!!!!!
     # timecost: 1.605s!!!!
     # 又快又好!!!
     #
@@ -435,7 +435,7 @@ def foodHeuristic(state, problem):
     # 决定路径后，对比原问题，如果还存在不在任意一个路径矩形中的点，则再适当放大启发值。
     # (如果通过按象限枚举所有点，求出一个最长路径，虽然一定得到更优的路径，但当一个点被吃掉后很难证明一致性，而且当前的选点方式已经足够拿到bonus)
 
-    # 记录pacman，事物信息
+    # 记录pacman，食物信息
     position, foodGrid = state
     foodList = foodGrid.asList()
     # 叉乘函数（本来用来验证三点共线，但是没用上）
@@ -570,8 +570,7 @@ def foodHeuristic(state, problem):
         return util.manhattanDistance(position, foodList[0])
     if len(foodList) == 2:
         return min(util.manhattanDistance(position, foodList[0]),
-                   util.manhattanDistance(position, foodList[1]))
-        +util.manhattanDistance(foodList[0], foodList[1])
+                   util.manhattanDistance(position, foodList[1]))+util.manhattanDistance(foodList[0], foodList[1])
     # 食物数量大，利用我们设计的方法进行处理
     if len(foodList) > 2:
         quad = []  # 四边形四个顶点
@@ -608,14 +607,12 @@ def foodHeuristic(state, problem):
                 if util.manhattanDistance(position, food) > ans:
                     ans = util.manhattanDistance(position, food)
                     node = food
-                Ranges.append(
-                    (min(position[0], food[0]), max(position[0], food[0]),
-                     min(position[1], food[1]), max(position[1], food[1])))
-                endnode = food  # 记录下一个端点，另一个端点是position，即pacman位置
+            Ranges.append((min(position[0], node[0]), max(position[0], node[0]),min(position[1], node[1]), max(position[1], node[1])))
+            endnode = node  # 记录下一个端点，另一个端点是position，即pacman位置
             # 如果存在额外的食物点不在任何一个路径矩形的范围内时，此时距离实际最短路径一定有偏差
-            # 如果这个额外的食物点在我们选择的路径的两个端点的紧邻时，我们的当前估计与最短路径最少差1（吃掉这个额外点）
+            # 如果这个额外的食物点在我们选择的路径的末端点的紧邻时，我们的当前估计与最短路径最少差1（吃掉这个额外点）
             # 如果不在，则我们的当前估计与最短路径最少差2：不管是从两端延伸出一条新边，还是修改边从而偏离我们目前的路径再返回，最少开销都是2
-
+            add=0
             for food in foodList:
                 for Range in Ranges:
                     if food[0] >= Range[0] and food[0] <= Range[1] and food[
@@ -626,13 +623,11 @@ def foodHeuristic(state, problem):
                         extra = 1
                 if extra != 0:
                     if util.manhattanDistance(
-                            food, endnode) == 1 or util.manhattanDistance(
-                                food, position) == 1:
-                        ans += 1
+                            food, endnode) ==1:
+                        add=max(add,1)
                     else:
-                        ans += 2
-                    break
-            return ans
+                        add=max(add,2)
+            return ans+add
         # 只有两个象限有点：两个点连起来，pacman再选一个离自己最近的点
         elif len(quad) == 2:
             extra = 0  # 附加值
@@ -658,9 +653,9 @@ def foodHeuristic(state, problem):
                                    quad[0][1]), max(position[1], quad[0][1])))
                 endnode = quad[1]
             # 如果存在额外的食物点不在任何一个路径矩形的范围内时，此时距离实际最短路径一定有偏差
-            # 如果这个额外的食物点在我们选择的路径的两个端点的紧邻时，我们的当前估计与最短路径最少差1（吃掉这个额外点）
+            # 如果这个额外的食物点在我们选择的路径的末端点的紧邻时，我们的当前估计与最短路径最少差1（吃掉这个额外点）
             # 如果不在，则我们的当前估计与最短路径最少差2：不管是从两端延伸出一条新边，还是修改边从而偏离我们目前的路径再返回，最少开销都是2
-
+            add=0
             for food in foodList:
                 for Range in Ranges:
                     if food[0] >= Range[0] and food[0] <= Range[1] and food[
@@ -671,13 +666,11 @@ def foodHeuristic(state, problem):
                         extra = 1
                 if extra != 0:
                     if util.manhattanDistance(
-                            food, endnode) == 1 or util.manhattanDistance(
-                                food, position) == 1:
-                        ans += 1
+                            food, endnode) ==1:
+                        add=max(add,1)
                     else:
-                        ans += 2
-                    break
-            return ans
+                        add=max(add,2)
+            return ans+add
         # 有三个或四个象限有点，此时已经可以连成闭环了，当成同种情况处理。
         else:
             ringpath = 0  #闭环长度
@@ -749,11 +742,11 @@ def foodHeuristic(state, problem):
             Ranges.remove(deledge)  #删除该删除的边
             Ranges.append(poslink)  #添加新的连边
             ans = minring
+            add=0
             # 如果存在额外的食物点不在任何一个路径矩形的范围内时，此时距离实际最短路径一定有偏差
-            # 如果这个额外的食物点在我们选择的路径的两个端点的紧邻时，我们的当前估计与最短路径最少差1（吃掉这个额外点）
+            # 如果这个额外的食物点在我们选择的路径的末端点的紧邻时，我们的当前估计与最短路径最少差1（吃掉这个额外点）
             # 如果不在，则我们的当前估计与最短路径最少差2：不管是从两端延伸出一条新边，还是修改边从而偏离我们目前的路径再返回，最少开销都是2
             for food in foodList:
-                add = 0.5
                 for Range in Ranges:
                     if food[0] >= Range[0] and food[0] <= Range[1] and food[
                             1] >= Range[2] and food[1] <= Range[3]:
@@ -763,13 +756,11 @@ def foodHeuristic(state, problem):
                         extra = 0.5
                 if extra != 0:
                     if util.manhattanDistance(
-                            food, endnode) == 1 or util.manhattanDistance(
-                                food, position) == 1:
-                        ans += 1
+                                food, endnode) == 1:
+                        add=max(add,1)
                     else:
-                        ans += 2
-                    break
-            return ans
+                        add=max(add,2)
+            return ans+add
 
 # 实现方法到这里就结束了 后面是一些曾经尝试过并且没有被删去的方法。
 
