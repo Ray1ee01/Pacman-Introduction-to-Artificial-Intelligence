@@ -834,7 +834,7 @@ def foodHeuristic(state, problem):
 
 # corner search:每次取3-4个点，计算这几个点的路径的排列组合，找到一个最小值！
 #               但是简单选取效果不好，如果枚举4个点，每次要做O(n^4)的操作，复杂度有点高，而且常数很大，实际应用起来很慢。
-# related work:室友胡（非软院，非本课程）的实现方法大致如上，对corner search的结果进行了一些优化。expanded node:6800+ 但是运行时间很慢，在15-20s之间。
+# related work:室友胡（非软院，非本课程）的实现方法大致是枚举corner search，再对corner search的结果进行了一些优化。expanded node:6800+ 但是运行时间很慢，在15-20s之间。
     """
     if len(foodList) == 0: return 0
     if len(foodList) == 1: return distance(position, foodList[0])
