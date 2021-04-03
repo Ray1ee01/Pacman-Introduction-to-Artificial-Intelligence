@@ -105,13 +105,15 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
     """
-
+    def __init(self):
+        self.alpha=-1e5
+        self.beta=1e5
     def getAction(self, gameState):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        def Minimax_Value(self,gameState,depth,alpha,beta,agentIndex=0):
+        def Minimax_Value(self,gameState,depth,agentIndex=0):
             if depth<=0 or gameState.isWin() or gameState.isLose():
                 return self.evaluationFunction(gameState)
             actions=gameState.getLegalActions(agentIndex)
@@ -119,26 +121,27 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 v=-1e5
                 for action in actions:
                     nextState=gameState.generateChild(agentIndex,action)
-                    v=max(v,Minimax_Value(self,nextState,depth-1,alpha,beta,agentIndex+1))
-                    if v>=beta:return v
-                    alpha=max(alpha,v)
+                    v=max(v,Minimax_Value(self,nextState,depth-1,agentIndex+1))
+                    if v>=self.beta:return v
+                    self.alpha=max(self.alpha,v)
                 return v
             else:
                 v=1e5
                 for action in actions:
                     nextState=gameState.generateChild(agentIndex,action)
-                    v=min(v,Minimax_Value(self,nextState,depth,alpha,beta,(agentIndex+1)%(gameState.getNumAgents())))
-                    if v<=alpha:return v
-                    beta=min(beta,v)
+                    v=min(v,Minimax_Value(self,nextState,depth,(agentIndex+1)%(gameState.getNumAgents())))
+                    if v<=self.alpha:return v
+                    self.beta=min(self.beta,v)
                 return v
         
         max_act=gameState.getLegalActions(0)[random.randint(0,len(gameState.getLegalActions(0))-1)]     #设置一个默认动作
         value=-1e5
-        a=-1e5
-        b=1e5
+        self.alpha=-1e6
+        self.beta=1e6
         for act in gameState.getLegalActions(0):
             nextState=gameState.generateChild(0,act)
-            cur_v=Minimax_Value(self,nextState,self.depth,a,b,1)
+            cur_v=Minimax_Value(self,nextState,self.depth,1)
+            #print(self.alpha,self.beta)
             if value<cur_v:
                 max_act=[act]
                 value=cur_v
